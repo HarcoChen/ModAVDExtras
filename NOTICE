@@ -1,0 +1,29 @@
+ModAVDExtras
+Copyright 2026 qiyinxi
+
+Licensed under the GNU Lesser General Public License, version 3 or (at your
+option) any later version (SPDX-License-Identifier: LGPL-3.0-or-later); see
+the LICENSE file, and the COPYING file for the GNU General Public License
+version 3 that it supplements.
+
+The library (include/, src/), the compatibility shell (shim/), the tests
+(tests/) and the build files are written for this project. They contain no
+third-party code. The layout of the shared frame follows the emulator's
+VideoFrameSharer.h in AOSP (platform/external/qemu, Apache-2.0); only the
+layout is used, no code is copied. The exported names of the compatibility
+shell match the functions MaaCore looks up in MuMu's external_renderer_ipc.dll;
+the shell contains no code from MuMu or MaaCore.
+
+scripts/privacy.py, scripts/repo_checks.py and scripts/test_repo_checks.py are
+the ModAVD organisation's repository checks, copied unchanged from
+ModAVDHostIME, where they are licensed under the GNU Affero General Public
+License, version 3 or (at your option) any later version
+(AGPL-3.0-or-later). They only run in CI and are not part of the library.
+
+---
+
+ModAVDExtras，Copyright 2026 qiyinxi，按 GNU Lesser General Public License 第 3 版或（由你选择）任何更新的版本授权（LGPL-3.0-or-later），见 LICENSE；它所补充的 GPL 第 3 版见 COPYING。
+
+库（include/、src/）、兼容外壳（shim/）、测试（tests/）和构建文件都是为本项目写的，不含第三方代码。共享内存的布局参照 AOSP 模拟器的 VideoFrameSharer.h（platform/external/qemu，Apache-2.0），只用了布局，没有复制代码。兼容外壳的导出名和 MaaCore 在 MuMu 的 external_renderer_ipc.dll 里查找的函数名相同，外壳里没有 MuMu 或 MaaCore 的代码。
+
+scripts/privacy.py、scripts/repo_checks.py、scripts/test_repo_checks.py 是 ModAVD 组织的仓库检查脚本，原样取自 ModAVDHostIME，在那里按 GNU Affero General Public License 第 3 版或任何更新的版本授权（AGPL-3.0-or-later）。它们只在 CI 里跑，不属于这个库。

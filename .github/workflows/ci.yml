@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-2025
+    timeout-minutes: 15
+    steps:
+      - name: Checkout without persistent credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build and test (MSVC)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          cmake -S . -B build -A x64
+          if ($LASTEXITCODE -ne 0) { throw "configure failed" }
+          cmake --build build --config Release
+          if ($LASTEXITCODE -ne 0) { throw "build failed" }
+          ctest --test-dir build -C Release --output-on-failure
+          if ($LASTEXITCODE -ne 0) { throw "tests failed" }
+          Get-FileHash build\Release\*.dll -Algorithm SHA256 | Format-Table -AutoSize
+
+  posix:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - name: Checkout without persistent credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build and test
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+          ctest --test-dir build --output-on-failure
+
+  privacy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Checkout without persistent credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Scan tracked files for private data
+        shell: bash
+        run: python3 -B -I -X utf8 scripts/privacy.py . --allowlist scripts/privacy-allowlist.json
+
+  authors:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      CHECK_BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
+      CHECK_HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      CHECK_MANUAL: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
+    steps:
+      - name: Checkout full history without persistent credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Run repo checks unit tests
+        shell: bash
+        run: python3 -B -I -X utf8 scripts/test_repo_checks.py -v
+      - name: Check commit authors and trailers
+        shell: bash
+        run: python3 -B -I -X utf8 scripts/repo_checks.py
