@@ -150,11 +150,13 @@ static void convert_row(const uint8_t* src, uint8_t* dst, uint32_t width, uint32
         memcpy(dst, src, (size_t)width * 4);
         break;
     case MODAVD_FMT_RGBA:
-        for (uint32_t x = 0; x < width; ++x, src += 4, dst += 4) {
-            dst[0] = src[2];
-            dst[1] = src[1];
-            dst[2] = src[0];
-            dst[3] = src[3];
+        /* One 32-bit word per pixel (little-endian: B,G,R,A bytes = 0xAARRGGBB): swap R and B.
+         * memcpy keeps it safe for an unaligned caller buffer; compilers turn it into plain loads. */
+        for (uint32_t x = 0; x < width; ++x) {
+            uint32_t p;
+            memcpy(&p, src + (size_t)x * 4, 4);
+            p = (p & 0xFF00FF00u) | ((p & 0xFFu) << 16) | ((p >> 16) & 0xFFu);
+            memcpy(dst + (size_t)x * 4, &p, 4);
         }
         break;
     case MODAVD_FMT_BGR:

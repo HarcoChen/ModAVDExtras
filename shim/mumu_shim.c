@@ -75,11 +75,13 @@ static void shim_log(const char* fmt, ...)
     shim_write_log(msg);
 }
 
+/* Only the library's warnings go to avdshim.log: one line per connect, like before. */
 static void core_log(int level, const char* msg, void* user)
 {
-    (void)level;
     (void)user;
-    shim_write_log(msg);
+    if (level <= MODAVD_LOG_WARN) {
+        shim_write_log(msg);
+    }
 }
 
 /*   index >= 20000                     -> index is the emulator console port (what AUTO-MAS passes)
