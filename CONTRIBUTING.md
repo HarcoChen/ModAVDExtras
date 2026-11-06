@@ -27,3 +27,5 @@ ModAVD 组织的通用规矩见 [ModAVD 的 CONTRIBUTING.md](https://github.com/
 ## workflow
 
 第三方 action 钉到 40 位提交 SHA，不用 `pull_request_target`，不用自托管 runner。改 workflow 的 PR 由另一个人审。
+
+`scripts/privacy.py` 与 ModAVD 主仓逐字节相同，CI 会核对。修改扫描器时先改 ModAVD，再原样同步过来；`privacy-allowlist.json` 仍由本仓库维护。
